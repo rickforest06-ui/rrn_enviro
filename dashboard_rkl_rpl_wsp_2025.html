@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard RKL-RPL | PT Wana Subur Persada | Semester II 2025</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<style>
+  :root {
+    --primary: #0f3460;
+    --secondary: #16213e;
+    --accent: #e94560;
+    --accent2: #0f9b8e;
+    --accent3: #f5a623;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1a202c;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --green: #16a34a;
+    --red: #dc2626;
+    --yellow: #ca8a04;
+    --green-bg: #dcfce7;
+    --red-bg: #fee2e2;
+    --yellow-bg: #fef9c3;
+    --shadow: 0 4px 24px rgba(15,52,96,0.10);
+    --shadow-lg: 0 8px 40px rgba(15,52,96,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* ── TOP BANNER ── */
+  .top-banner {
+    background: linear-gradient(135deg, var(--primary) 0%, #1e4d8c 50%, var(--secondary) 100%);
+    color: white;
+    padding: 28px 40px 24px;
+    position: relative;
+    overflow: hidden;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .top-banner::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .top-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 30%;
+    width: 400px; height: 200px;
+    border-radius: 50%;
+    background: rgba(14,155,142,0.12);
+  }
+  .banner-inner { position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
+  .banner-left h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+  .banner-left h1 span { color: #7dd3fc; }
+  .banner-left p { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+  .banner-meta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+  .meta-tag {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+  }
+  .banner-right { text-align: right; }
+  .banner-right .date-badge {
+    background: rgba(14,155,142,0.3);
+    border: 1px solid rgba(14,155,142,0.5);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 11px;
+    color: #a7f3d0;
+    font-weight: 600;
+  }
+  .banner-right .date-badge strong { display: block; font-size: 16px; color: white; }
+
+  /* ── NAV TABS ── */
+  .nav-tabs {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .nav-tab {
+    padding: 14px 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-tab:hover { color: var(--primary); }
+  .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .nav-tab .dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  /* ── MAIN CONTENT ── */
+  .main { padding: 32px 40px; max-width: 1600px; margin: 0 auto; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── SCORECARD GRID ── */
+  .scorecard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .scorecard {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+  .scorecard:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .scorecard::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    border-radius: 14px 14px 0 0;
+  }
+  .scorecard.green::before { background: linear-gradient(90deg, #16a34a, #4ade80); }
+  .scorecard.red::before { background: linear-gradient(90deg, #dc2626, #f87171); }
+  .scorecard.blue::before { background: linear-gradient(90deg, #0f3460, #3b82f6); }
+  .scorecard.orange::before { background: linear-gradient(90deg, #ea580c, #fb923c); }
+  .scorecard.teal::before { background: linear-gradient(90deg, #0f9b8e, #2dd4bf); }
+  .scorecard .label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .scorecard .value { font-size: 32px; font-weight: 800; margin: 6px 0 4px; line-height: 1; }
+  .scorecard.green .value { color: #16a34a; }
+  .scorecard.red .value { color: #dc2626; }
+  .scorecard.blue .value { color: #0f3460; }
+  .scorecard.orange .value { color: #ea580c; }
+  .scorecard.teal .value { color: #0f9b8e; }
+  .scorecard .sub { font-size: 11px; color: var(--text-muted); }
+  .scorecard .icon { font-size: 28px; position: absolute; top: 16px; right: 16px; opacity: 0.15; }
+
+  /* ── CHART GRID ── */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+  .chart-card {
+    background: white;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+  }
+  .chart-card.full { grid-column: 1 / -1; }
+  .chart-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 4px;
+  }
+  .chart-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 18px;
+  }
+  .chart-wrap { position: relative; height: 220px; }
+  .chart-wrap.tall { height: 280px; }
+  .chart-wrap.map { height: 400px; border-radius: 10px; overflow: hidden; }
+
+  /* ── DATA TABLE ── */
+  .data-table-wrap {
+    background: white;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .table-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .table-header h3 { font-size: 13px; font-weight: 700; color: var(--primary); }
+  .table-header p { font-size: 11px; color: var(--text-muted); }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .badge.green { background: var(--green-bg); color: var(--green); }
+  .badge.red { background: var(--red-bg); color: var(--red); }
+  .badge.yellow { background: var(--yellow-bg); color: var(--yellow); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: #f8fafc;
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+  }
+  thead th.center { text-align: center; }
+  tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.15s; }
+  tbody tr:hover { background: #f8fafc; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 9px 14px; font-size: 12px; }
+  tbody td.center { text-align: center; }
+  tbody td.right { text-align: right; }
+  tbody td.mono { font-family: 'DM Mono', monospace; font-size: 11px; }
+  .param-name { font-weight: 600; color: var(--text); }
+  .param-cat { font-size: 10px; color: var(--text-muted); }
+
+  /* ── STATUS PILLS ── */
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 10px; font-weight: 700;
+  }
+  .pill.ok { background: #dcfce7; color: #15803d; }
+  .pill.over { background: #fee2e2; color: #b91c1c; }
+  .pill.near { background: #fef9c3; color: #a16207; }
+
+  /* ── TWO COL ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+
+  /* ── PROGRESS BAR ── */
+  .prog-bar-wrap { display: flex; flex-direction: column; gap: 10px; }
+  .prog-item { display: flex; flex-direction: column; gap: 4px; }
+  .prog-label { display: flex; justify-content: space-between; font-size: 11px; }
+  .prog-label span:first-child { font-weight: 600; color: var(--text); }
+  .prog-label span:last-child { font-weight: 700; color: var(--primary); }
+  .prog-bar { height: 8px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 10px; transition: width 1s ease; }
+
+  /* ── MAP LEGEND ── */
+  .map-legend {
+    position: absolute; bottom: 20px; left: 10px; z-index: 1000;
+    background: rgba(15,52,96,0.92);
+    border-radius: 10px; padding: 10px 14px;
+    font-size: 11px; color: white;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── CSR TABLE ── */
+  .csr-cat {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .cat-infra { background: #dbeafe; color: #1d4ed8; }
+  .cat-agama { background: #fae8ff; color: #7e22ce; }
+  .cat-sosial { background: #fff7ed; color: #c2410c; }
+  .cat-olah { background: #ecfdf5; color: #065f46; }
+  .cat-pend { background: #fefce8; color: #854d0e; }
+  .cat-lain { background: #f1f5f9; color: #475569; }
+  .cat-air { background: #e0f2fe; color: #0369a1; }
+  .cat-eko { background: #f0fdf4; color: #166534; }
+  .cat-ling { background: #f0fdf4; color: #166534; }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-size: 18px; font-weight: 800; color: var(--primary);
+    margin-bottom: 6px;
+  }
+  .section-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 24px; }
+
+  /* ── INFO BOX ── */
+  .info-box {
+    background: linear-gradient(135deg, #eff6ff, #e0f2fe);
+    border: 1px solid #bfdbfe;
+    border-left: 4px solid var(--primary);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 12px;
+    color: #1e3a5f;
+    margin-bottom: 20px;
+    line-height: 1.7;
+  }
+  .warn-box {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-left: 4px solid #ea580c;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 12px;
+    color: #7c2d12;
+    margin-bottom: 20px;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: var(--primary);
+    color: rgba(255,255,255,0.6);
+    text-align: center;
+    padding: 16px;
+    font-size: 11px;
+    margin-top: 40px;
+  }
+  .footer strong { color: white; }
+
+  /* ── PRINT ── */
+  @media print {
+    .nav-tabs { display: none; }
+    .section { display: block !important; page-break-before: always; }
+    .section:first-of-type { page-break-before: avoid; }
+    body { background: white; }
+    .scorecard, .chart-card, .data-table-wrap { box-shadow: none; border: 1px solid #e2e8f0; }
+  }
+
+  @media (max-width: 768px) {
+    .main { padding: 16px 16px; }
+    .top-banner { padding: 20px 16px; }
+    .nav-tabs { padding: 0 16px; }
+    .two-col, .three-col { grid-template-columns: 1fr; }
+    .chart-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ TOP BANNER ══════════════════ -->
+<div class="top-banner">
+  <div class="banner-inner">
+    <div class="banner-left">
+      <h1>Dashboard <span>RKL-RPL</span> Lingkungan</h1>
+      <p>PT. Wana Subur Persada | IUPHHK-HTI ±42.440 Ha | Kab. Sekadau & Ketapang, Kalimantan Barat</p>
+      <div class="banner-meta">
+        <span class="meta-tag">📄 SK Gub. Kalbar No.435/BLHD/2012</span>
+        <span class="meta-tag">🔬 Lab: PT Mutuagung Lestari Tbk</span>
+        <span class="meta-tag">✅ VLHH · PHL · SMK3 · PROPER</span>
+      </div>
+    </div>
+    <div class="banner-right">
+      <div class="date-badge">
+        <strong>Semester II / 2025</strong>
+        Juli — Desember 2025
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ NAV TABS ══════════════════ -->
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="showTab('overview')">
+    <span class="dot" style="background:#0f3460"></span> Ringkasan
+  </div>
+  <div class="nav-tab" onclick="showTab('udara')">
+    <span class="dot" style="background:#16a34a"></span> Udara & Kebisingan
+  </div>
+  <div class="nav-tab" onclick="showTab('emisi')">
+    <span class="dot" style="background:#0f9b8e"></span> Emisi Genset
+  </div>
+  <div class="nav-tab" onclick="showTab('air')">
+    <span class="dot" style="background:#3b82f6"></span> Kualitas Air
+  </div>
+  <div class="nav-tab" onclick="showTab('hotspot')">
+    <span class="dot" style="background:#dc2626"></span> Dalkarhutla & Hotspot
+  </div>
+  <div class="nav-tab" onclick="showTab('erosi')">
+    <span class="dot" style="background:#f5a623"></span> Erosi & Debit Air
+  </div>
+  <div class="nav-tab" onclick="showTab('k3')">
+    <span class="dot" style="background:#7c3aed"></span> K3 & Kesehatan
+  </div>
+  <div class="nav-tab" onclick="showTab('csr')">
+    <span class="dot" style="background:#ea580c"></span> CSR / TJSLP
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ══════════════════ OVERVIEW ══════════════════ -->
+<div id="overview" class="section active">
+  <div class="section-title">Ringkasan Eksekutif</div>
+  <div class="section-sub">Semester II Tahun 2025 (Juli – Desember 2025) | Tahap Operasi</div>
+
+  <div class="scorecard-grid">
+    <div class="scorecard green">
+      <div class="icon">💨</div>
+      <div class="label">Kualitas Udara</div>
+      <div class="value">100%</div>
+      <div class="sub">48/48 param. memenuhi BM</div>
+    </div>
+    <div class="scorecard green">
+      <div class="icon">🔊</div>
+      <div class="label">Kebisingan</div>
+      <div class="value">✓</div>
+      <div class="sub">6/6 titik memenuhi BM</div>
+    </div>
+    <div class="scorecard green">
+      <div class="icon">⚡</div>
+      <div class="label">Emisi Genset</div>
+      <div class="value">✓</div>
+      <div class="sub">2 unit memenuhi BM</div>
+    </div>
+    <div class="scorecard blue">
+      <div class="icon">💧</div>
+      <div class="label">Titik Pantau Air</div>
+      <div class="value">7</div>
+      <div class="sub">A1 – A7 terpantau</div>
+    </div>
+    <div class="scorecard orange">
+      <div class="icon">🔥</div>
+      <div class="label">Hotspot Sem.II</div>
+      <div class="value">168</div>
+      <div class="sub">Ladang berpindah, terkendali</div>
+    </div>
+    <div class="scorecard green">
+      <div class="icon">🦺</div>
+      <div class="label">Kecelakaan Kerja</div>
+      <div class="value">0</div>
+      <div class="sub">Zero Accident ✓</div>
+    </div>
+    <div class="scorecard teal">
+      <div class="icon">🌿</div>
+      <div class="label">Patok Kaw. Lindung</div>
+      <div class="value">120</div>
+      <div class="sub">BZHL + KPPN + SS</div>
+    </div>
+    <div class="scorecard orange">
+      <div class="icon">🤝</div>
+      <div class="label">Anggaran CSR</div>
+      <div class="value" style="font-size:18px">464,9Jt</div>
+      <div class="sub">27 kegiatan TJSLP</div>
+    </div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">Status Ketaatan Keseluruhan</div>
+      <div class="chart-sub">Evaluasi Compliance Semester II 2025</div>
+      <div class="chart-wrap">
+        <canvas id="chartKetaatan"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Tren Hotspot dalam Konsesi WSP</div>
+      <div class="chart-sub">Perbandingan per Tahun (NASA FIRMS)</div>
+      <div class="chart-wrap">
+        <canvas id="chartHotspotOverview"></canvas>
+      </div>
+    </div>
+    <div class="chart-card full">
+      <div class="chart-title">Ringkasan Status Parameter per Komponen</div>
+      <div class="chart-sub">Jumlah parameter memenuhi / melampaui baku mutu</div>
+      <div class="chart-wrap">
+        <canvas id="chartKomponen"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <strong>📋 Dasar Hukum:</strong> Laporan ini disusun berdasarkan SK Gubernur Kalimantan Barat No. 435/BLHD/2012 tentang Dokumen AMDAL IUPHHK-HTI PT. Wana Subur Persada, sesuai Keputusan Menteri Lingkungan Hidup No. 45 Tahun 2005 tentang Pedoman Penyusunan Laporan Pelaksanaan RKL-RPL. Pemantauan laboratorium dilaksanakan oleh <strong>PT Mutuagung Lestari Tbk (terakreditasi)</strong> pada tanggal 13–16 Desember 2025.
+  </div>
+</div>
+
+<!-- ══════════════════ UDARA & KEBISINGAN ══════════════════ -->
+<div id="udara" class="section">
+  <div class="section-title">Kualitas Udara Ambien & Kebisingan</div>
+  <div class="section-sub">Pengambilan sampel: 13–14 Desember 2025 | Lab: PT Mutuagung Lestari Tbk | Ref BM: PP No.22/2021 Lamp.VII & KepMen LH 48/1996</div>
+
+  <div class="scorecard-grid">
+    <div class="scorecard green"><div class="icon">🌫️</div><div class="label">SO₂ Maks</div><div class="value">23,7</div><div class="sub">µg/m³ | BM: 150</div></div>
+    <div class="scorecard green"><div class="icon">💨</div><div class="label">NO₂ Maks</div><div class="value">25,5</div><div class="sub">µg/m³ | BM: 200</div></div>
+    <div class="scorecard green"><div class="icon">☁️</div><div class="label">TSP Maks</div><div class="value">56,4</div><div class="sub">µg/m³ | BM: 230</div></div>
+    <div class="scorecard green"><div class="icon">🔬</div><div class="label">PM10 Maks</div><div class="value">28,9</div><div class="sub">µg/m³ | BM: 75</div></div>
+    <div class="scorecard green"><div class="icon">🔬</div><div class="label">PM2.5 Maks</div><div class="value">15,9</div><div class="sub">µg/m³ | BM: 55</div></div>
+    <div class="scorecard green"><div class="icon">🔊</div><div class="label">LSM Maks (Pmkm)</div><div class="value">50,9</div><div class="sub">dB(A) | BM: 55</div></div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">Perbandingan Parameter Gas vs Baku Mutu</div>
+      <div class="chart-sub">SO₂, NO₂, O₃ di 6 titik pantau (µg/m³)</div>
+      <div class="chart-wrap tall">
+        <canvas id="chartGas"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Partikulat Debu vs Baku Mutu</div>
+      <div class="chart-sub">TSP, PM10, PM2.5 di 6 titik pantau (µg/m³)</div>
+      <div class="chart-wrap tall">
+        <canvas id="chartDebu"></canvas>
+      </div>
+    </div>
+    <div class="chart-card full">
+      <div class="chart-title">Tingkat Kebisingan LSM vs Baku Mutu</div>
+      <div class="chart-sub">Kebisingan ekivalen 24 jam di semua titik pantau — dB(A)</div>
+      <div class="chart-wrap">
+        <canvas id="chartKebisingan"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="data-table-wrap">
+    <div class="table-header">
+      <div><h3>Hasil Pemantauan Kualitas Udara Ambien — 6 Titik Pantau</h3><p>Desember 2025 | Baku Mutu: PP No.22/2021 Lamp.VII</p></div>
+      <span class="badge green">✓ Semua Memenuhi BM</span>
+    </div>
+    <table>
+      <thead><tr>
+        <th>Kode</th><th>Lokasi</th>
+        <th class="center">SO₂<br><small>(µg/m³)</small></th>
+        <th class="center">CO<br><small>(µg/m³)</small></th>
+        <th class="center">NO₂<br><small>(µg/m³)</small></th>
+        <th class="center">O₃<br><small>(µg/m³)</small></th>
+        <th class="center">TSP<br><small>(µg/m³)</small></th>
+        <th class="center">PM10<br><small>(µg/m³)</small></th>
+        <th class="center">PM2.5<br><small>(µg/m³)</small></th>
+        <th class="center">LSM<br><small>(dB)</small></th>
+        <th class="center">Status</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><strong>Kantor WSP</strong></td><td>Depan Kantor WSP</td><td class="center mono">23,7</td><td class="center mono">&lt;115</td><td class="center mono">24,9</td><td class="center mono">22,1</td><td class="center mono">43,5</td><td class="center mono">17,1</td><td class="center mono">10,0</td><td class="center mono">59,0</td><td class="center"><span class="pill ok">✓ Memenuhi</span></td></tr>
+        <tr><td><strong>U1</strong></td><td>Desa Tapang Tingang</td><td class="center mono">22,5</td><td class="center mono">&lt;115</td><td class="center mono">23,7</td><td class="center mono">21,9</td><td class="center mono">45,5</td><td class="center mono">13,5</td><td class="center mono">8,64</td><td class="center mono">49,2</td><td class="center"><span class="pill ok">✓ Memenuhi</span></td></tr>
+        <tr><td><strong>U2</strong></td><td>Desa Teluk Kebau</td><td class="center mono">21,2</td><td class="center mono">&lt;115</td><td class="center mono">23,4</td><td class="center mono">20,6</td><td class="center mono">56,4</td><td class="center mono">20,8</td><td class="center mono">11,3</td><td class="center mono">49,8</td><td class="center"><span class="pill ok">✓ Memenuhi</span></td></tr>
+        <tr><td><strong>U3</strong></td><td>Desa Karang Betung</td><td class="center mono">23,1</td><td class="center mono">&lt;114</td><td class="center mono">25,5</td><td class="center mono">22,3</td><td class="center mono">56,4</td><td class="center mono">28,0</td><td class="center mono">15,9</td><td class="center mono">48,8</td><td class="center"><span class="pill ok">✓ Memenuhi</span></td></tr>
+        <tr><td><strong>U4</strong></td><td>Desa Kenyabur</td><td class="center mono">22,5</td><td class="center mono">&lt;115</td><td class="center mono">23,7</td><td class="center mono">21,4</td><td class="center mono">51,4</td><td class="center mono">24,7</td><td class="center mono">12,6</td><td class="center mono">50,9</td><td class="center"><span class="pill ok">✓ Memenuhi</span></td></tr>
+        <tr><td><strong>U5</strong></td><td>Desa Krio Hulu</td><td class="center mono">21,8</td><td class="center mono">&lt;115</td><td class="center mono">24,2</td><td class="center mono">22,5</td><td class="center mono">56,4</td><td class="center mono">28,9</td><td class="center mono">14,7</td><td class="center mono">50,3</td><td class="center"><span class="pill ok">✓ Memenuhi</span></td></tr>
+        <tr style="background:#f0fdf4;font-weight:700;color:#15803d">
+          <td colspan="2">Baku Mutu</td>
+          <td class="center">150</td><td class="center">10.000</td><td class="center">200</td><td class="center">150</td><td class="center">230</td><td class="center">75</td><td class="center">55</td><td class="center">55–70</td><td class="center">—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════ EMISI GENSET ══════════════════ -->
+<div id="emisi" class="section">
+  <div class="section-title">Emisi Sumber Tidak Bergerak — Genset</div>
+  <div class="section-sub">Pengambilan sampel: 13 Desember 2025 | Ref BM: PerMen LH No.13/2009</div>
+
+  <div class="scorecard-grid">
+    <div class="scorecard green"><div class="icon">⚡</div><div class="label">NOx Genset 1 (135KVA)</div><div class="value">337</div><div class="sub">mg/Nm³ | BM: 3.400 (10%)</div></div>
+    <div class="scorecard green"><div class="icon">⚡</div><div class="label">NOx Genset 2 (45KVA)</div><div class="value">326</div><div class="sub">mg/Nm³ | BM: 3.400 (10%)</div></div>
+    <div class="scorecard green"><div class="icon">💨</div><div class="label">CO Genset 1</div><div class="value">159</div><div class="sub">mg/Nm³ | BM: 170 (94%)</div></div>
+    <div class="scorecard green"><div class="icon">💨</div><div class="label">CO Genset 2</div><div class="value">163</div><div class="sub">mg/Nm³ | BM: 170 (96%)</div></div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">NOx — Hasil vs Baku Mutu</div>
+      <div class="chart-sub">mg/Nm³ (dikoreksi O₂ 15%)</div>
+      <div class="chart-wrap">
+        <canvas id="chartNOx"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">CO — Hasil vs Baku Mutu</div>
+      <div class="chart-sub">mg/Nm³ (dikoreksi O₂ 15%) — Mendekati BM!</div>
+      <div class="chart-wrap">
+        <canvas id="chartCO"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="warn-box">
+    ⚠️ <strong>Perhatian — CO Genset:</strong> Nilai CO Genset 1 (159 mg/Nm³) dan Genset 2 (163 mg/Nm³) masing-masing mencapai <strong>93,5% dan 95,9%</strong> dari baku mutu (170 mg/Nm³). Meskipun masih memenuhi baku mutu, kondisi ini perlu mendapat perhatian. Disarankan untuk melakukan <strong>tune-up dan penggantian filter mesin</strong> sebelum pemantauan berikutnya.
+  </div>
+
+  <div class="data-table-wrap">
+    <div class="table-header">
+      <div><h3>Hasil Pemantauan Emisi Genset — 2 Unit</h3><p>Desember 2025 | Baku Mutu: PerMen LH No.13/2009</p></div>
+      <span class="badge green">✓ Semua Memenuhi BM</span>
+    </div>
+    <table>
+      <thead><tr>
+        <th>Unit</th><th>Kapasitas</th>
+        <th class="center">NOx Terukur<br><small>(mg/Nm³)</small></th>
+        <th class="center">NOx Terkoreksi<br><small>(mg/Nm³)</small></th>
+        <th class="center">CO Terukur<br><small>(mg/Nm³)</small></th>
+        <th class="center">CO Terkoreksi<br><small>(mg/Nm³)</small></th>
+        <th class="center">Partikulat<br><small>(mg/Nm³)</small></th>
+        <th class="center">SO₂<br><small>(mg/Nm³)</small></th>
+        <th class="center">O₂<br><small>(%)</small></th>
+        <th class="center">BM NOx/CO</th>
+        <th class="center">Status</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><strong>Genset 1</strong></td><td>135 KVA</td><td class="center mono">163</td><td class="center mono">337</td><td class="center mono">76,7</td><td class="center mono" style="color:#ca8a04;font-weight:700">159</td><td class="center mono">16,9</td><td class="center mono">31,4</td><td class="center mono">18,1%</td><td class="center">3.400 / 170</td><td class="center"><span class="pill ok">✓ Memenuhi</span></td></tr>
+        <tr><td><strong>Genset 2</strong></td><td>45 KVA</td><td class="center mono">136</td><td class="center mono">326</td><td class="center mono">68,0</td><td class="center mono" style="color:#ca8a04;font-weight:700">163</td><td class="center mono">18,3</td><td class="center mono">26,2</td><td class="center mono">18,5%</td><td class="center">3.400 / 170</td><td class="center"><span class="pill ok">✓ Memenuhi</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════ KUALITAS AIR ══════════════════ -->
+<div id="air" class="section">
+  <div class="section-title">Kualitas Air Sungai Permukaan</div>
+  <div class="section-sub">Pengambilan sampel: 15–16 Desember 2025 | 7 Titik Pantau | Ref BM: PP No.82/2001 Kelas II</div>
+
+  <div class="scorecard-grid">
+    <div class="scorecard blue"><div class="icon">📍</div><div class="label">Titik Pantau</div><div class="value">7</div><div class="sub">A1 – A7</div></div>
+    <div class="scorecard green"><div class="icon">✓</div><div class="label">pH Semua Titik</div><div class="value">✓</div><div class="sub">7,30 – 7,50 (BM: 6–9)</div></div>
+    <div class="scorecard green"><div class="icon">💧</div><div class="label">TDS Maks</div><div class="value">106</div><div class="sub">mg/L | BM: 1.000</div></div>
+    <div class="scorecard red"><div class="icon">⚠️</div><div class="label">Parameter Melebihi BM</div><div class="value">8</div><div class="sub">Karakateristik alami sungai hutan</div></div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">BOD — Semua Titik vs Baku Mutu</div>
+      <div class="chart-sub">mg/L | BM Kelas II: 3 mg/L</div>
+      <div class="chart-wrap">
+        <canvas id="chartBOD"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">COD — Semua Titik vs Baku Mutu</div>
+      <div class="chart-sub">mg/L | BM Kelas II: 25 mg/L</div>
+      <div class="chart-wrap">
+        <canvas id="chartCOD"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">DO (Oksigen Terlarut) — Semua Titik</div>
+      <div class="chart-sub">mg/L | BM Kelas II Min: 4 mg/L</div>
+      <div class="chart-wrap">
+        <canvas id="chartDO"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">pH — Semua Titik vs Baku Mutu</div>
+      <div class="chart-sub">BM Kelas II: 6 – 9</div>
+      <div class="chart-wrap">
+        <canvas id="chartPH"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="warn-box">
+    ⚠️ <strong>Catatan Analisis Kualitas Air:</strong> Beberapa parameter (BOD, COD, DO, Total Fosfat di A5, Fe & Zn & Cr-VI & Amoniak di A2) menunjukkan nilai melampaui BM Kelas II. Kondisi ini merupakan <strong>karakteristik alami ekosistem sungai hutan tropis</strong> yang kaya bahan organik dari serasah daun dan vegetasi riparian. Tidak terdapat indikasi pencemaran antropogenik dari kegiatan operasional HTI.
+  </div>
+
+  <div class="data-table-wrap">
+    <div class="table-header">
+      <div><h3>Status Parameter Kunci — 7 Titik Sungai</h3><p>Desember 2025 | BM: PP No.82/2001 Kelas II</p></div>
+    </div>
+    <table>
+      <thead><tr>
+        <th>Parameter</th><th class="center">BM Kls.II</th>
+        <th class="center">A1<br><small>Mongko</small></th>
+        <th class="center">A2<br><small>Knyb.Hulu</small></th>
+        <th class="center">A3<br><small>Knyb.Tgh</small></th>
+        <th class="center">A4<br><small>Knyb.Hilir</small></th>
+        <th class="center">A5<br><small>Kerio</small></th>
+        <th class="center">A6<br><small>Kerio Hulu</small></th>
+        <th class="center">A7<br><small>Kerio Hilir</small></th>
+      </tr></thead>
+      <tbody id="airTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════ HOTSPOT ══════════════════ -->
+<div id="hotspot" class="section">
+  <div class="section-title">Pengendalian Kebakaran Hutan dan Lahan (Dalkarhutla)</div>
+  <div class="section-sub">Data Hotspot NASA FIRMS dalam Konsesi WSP | 2023 – Semester II 2025</div>
+
+  <div class="scorecard-grid">
+    <div class="scorecard red"><div class="icon">🔥</div><div class="label">Hotspot Sem.II 2025</div><div class="value">168</div><div class="sub">Jul–Okt 2025</div></div>
+    <div class="scorecard orange"><div class="icon">📅</div><div class="label">Puncak Sep 2025</div><div class="value">127</div><div class="sub">titik, semua ladang berpindah</div></div>
+    <div class="scorecard green"><div class="icon">✓</div><div class="label">Kebakaran Liar</div><div class="value">0</div><div class="sub">Zero kejadian kebakaran liar</div></div>
+    <div class="scorecard blue"><div class="icon">🌧️</div><div class="label">Curah Hujan Sem.II</div><div class="value">1.544</div><div class="sub">mm | 86 hari hujan</div></div>
+    <div class="scorecard orange"><div class="icon">☀️</div><div class="label">Hari Tinggi (Agt)</div><div class="value">6</div><div class="sub">hari status cuaca tinggi</div></div>
+    <div class="scorecard green"><div class="icon">📢</div><div class="label">Sosialisasi</div><div class="value">✓</div><div class="sub">Pendampingan bakar ladang</div></div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">Tren Hotspot per Bulan (2023–2025)</div>
+      <div class="chart-sub">Jumlah titik hotspot dalam konsesi WSP — NASA FIRMS</div>
+      <div class="chart-wrap tall">
+        <canvas id="chartHotspotBulan"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Curah Hujan & Status Bahaya Kebakaran</div>
+      <div class="chart-sub">Semester II 2025 — mm & hari per status</div>
+      <div class="chart-wrap tall">
+        <canvas id="chartCurahHujan"></canvas>
+      </div>
+    </div>
+    <div class="chart-card full">
+      <div class="chart-title">Sebaran Hotspot dalam Konsesi WSP — Semester II 2025</div>
+      <div class="chart-sub">Titik Hijau = 2023 | Titik Biru = 2024 | Titik Merah = 2025 | Klik titik untuk detail</div>
+      <div class="chart-wrap map" id="mapHotspot" style="position:relative"></div>
+    </div>
+  </div>
+
+  <div class="data-table-wrap">
+    <div class="table-header">
+      <div><h3>Rekapitulasi Hotspot dalam Konsesi WSP 2023–2025</h3><p>Sumber: NASA FIRMS, diolah Tim CHSE PT WSP</p></div>
+    </div>
+    <table>
+      <thead><tr>
+        <th class="center">No</th><th>Bulan</th>
+        <th class="center">2023</th><th class="center">2024</th>
+        <th class="center">Jul 2025</th><th class="center">Agt 2025</th>
+        <th class="center">Sep 2025</th><th class="center">Okt 2025</th>
+        <th class="center">Total 2025</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="center">1</td><td>Juli</td><td class="center mono">40</td><td class="center mono">—</td><td class="center mono" style="color:#dc2626;font-weight:700">10</td><td class="center mono">—</td><td class="center mono">—</td><td class="center mono">—</td><td class="center mono">10</td></tr>
+        <tr><td class="center">2</td><td>Agustus</td><td class="center mono">263</td><td class="center mono">—</td><td class="center mono">—</td><td class="center mono" style="color:#dc2626;font-weight:700">30</td><td class="center mono">—</td><td class="center mono">—</td><td class="center mono">30</td></tr>
+        <tr><td class="center">3</td><td>September</td><td class="center mono">15</td><td class="center mono">139</td><td class="center mono">—</td><td class="center mono">—</td><td class="center mono" style="color:#dc2626;font-weight:700">127</td><td class="center mono">—</td><td class="center mono">127</td></tr>
+        <tr><td class="center">4</td><td>Oktober</td><td class="center mono">—</td><td class="center mono">—</td><td class="center mono">—</td><td class="center mono">—</td><td class="center mono">—</td><td class="center mono" style="color:#dc2626;font-weight:700">1</td><td class="center mono">1</td></tr>
+        <tr style="background:#f0fdf4;font-weight:700">
+          <td colspan="2" style="color:#15803d">TOTAL</td>
+          <td class="center mono" style="color:#0f3460">318</td>
+          <td class="center mono" style="color:#0f3460">139</td>
+          <td class="center mono">10</td><td class="center mono">30</td><td class="center mono">127</td><td class="center mono">1</td>
+          <td class="center mono" style="color:#dc2626">168</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="data-table-wrap">
+    <div class="table-header">
+      <div><h3>Data Curah Hujan & Status Bahaya Kebakaran Semester II 2025</h3><p>Sumber: Stasiun Cuaca PT WSP</p></div>
+    </div>
+    <table>
+      <thead><tr>
+        <th class="center">No</th><th>Bulan</th>
+        <th class="center">Curah Hujan (mm)</th>
+        <th class="center">Hari Hujan</th><th class="center">Hari Kering</th>
+        <th class="center">Status Rendah</th><th class="center">Status Sedang</th>
+        <th class="center">Status Tinggi</th><th class="center">Status Ekstrim</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="center">7</td><td><strong>Juli</strong></td><td class="center mono">145,0</td><td class="center">10</td><td class="center">20</td><td class="center">25</td><td class="center">5</td><td class="center">—</td><td class="center">—</td></tr>
+        <tr><td class="center">8</td><td><strong>Agustus</strong></td><td class="center mono">235,0</td><td class="center">12</td><td class="center">19</td><td class="center">19</td><td class="center">6</td><td class="center" style="color:#dc2626;font-weight:700">6</td><td class="center">—</td></tr>
+        <tr><td class="center">9</td><td><strong>September</strong></td><td class="center mono">295,5</td><td class="center">15</td><td class="center">16</td><td class="center">29</td><td class="center">2</td><td class="center">—</td><td class="center">—</td></tr>
+        <tr><td class="center">10</td><td><strong>Oktober</strong></td><td class="center mono">304,5</td><td class="center">15</td><td class="center">15</td><td class="center">27</td><td class="center">3</td><td class="center">—</td><td class="center">—</td></tr>
+        <tr><td class="center">11</td><td><strong>November</strong></td><td class="center mono">336,0</td><td class="center">20</td><td class="center">11</td><td class="center">29</td><td class="center">2</td><td class="center">—</td><td class="center">—</td></tr>
+        <tr><td class="center">12</td><td><strong>Desember</strong></td><td class="center mono">227,5</td><td class="center">14</td><td class="center">16</td><td class="center">29</td><td class="center">1</td><td class="center">—</td><td class="center">—</td></tr>
+        <tr style="background:#f0fdf4;font-weight:700;color:#15803d">
+          <td colspan="2">TOTAL Sem. II</td>
+          <td class="center mono">1.543,5</td><td class="center">86</td><td class="center">97</td>
+          <td class="center">158</td><td class="center">19</td>
+          <td class="center" style="color:#ea580c">6</td><td class="center">0</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════ EROSI ══════════════════ -->
+<div id="erosi" class="section">
+  <div class="section-title">Laju Erosi Tanah & Debit Air Sungai</div>
+  <div class="section-sub">Pengukuran lapangan bulanan Tim CHSE PT WSP | 3 Titik Erosi (T1, T2, T3) | 4 Titik Debit (A2, A3, A4, A5)</div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">Laju Erosi Tanah Semester II 2025</div>
+      <div class="chart-sub">mm/bulan — T1, T2, T3 | Oktober tertinggi (Oktober hujan tinggi)</div>
+      <div class="chart-wrap tall">
+        <canvas id="chartErosi"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Debit Air Sungai 2025</div>
+      <div class="chart-sub">m³/detik — A2, A3, A4, A5 (Jan–Nov)</div>
+      <div class="chart-wrap tall">
+        <canvas id="chartDebit"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="data-table-wrap">
+    <div class="table-header">
+      <div><h3>Hasil Pengukuran Laju Erosi Tanah Semester II 2025</h3><p>3 Titik Patok Erosi | Sumber: Tim CHSE PT WSP</p></div>
+    </div>
+    <table>
+      <thead><tr>
+        <th class="center">No</th><th>Bulan</th>
+        <th class="center">T1 (mm)</th><th class="center">T2 (mm)</th><th class="center">T3 (mm)</th>
+        <th class="center">Rata-rata (mm)</th><th class="center">Kategori</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="center">1</td><td>Juli</td><td class="center mono">0</td><td class="center mono">1,13</td><td class="center mono">0</td><td class="center mono">0,38</td><td class="center"><span class="pill ok">Sangat Rendah</span></td></tr>
+        <tr><td class="center">2</td><td>Agustus</td><td class="center mono">1,13</td><td class="center mono">1,13</td><td class="center mono">0</td><td class="center mono">0,75</td><td class="center"><span class="pill ok">Sangat Rendah</span></td></tr>
+        <tr><td class="center">3</td><td>September</td><td class="center mono">1,13</td><td class="center mono">2,27</td><td class="center mono">0</td><td class="center mono">1,13</td><td class="center"><span class="pill ok">Sangat Rendah</span></td></tr>
+        <tr><td class="center">4</td><td>Oktober</td><td class="center mono" style="color:#ea580c;font-weight:700">4,53</td><td class="center mono" style="color:#dc2626;font-weight:700">6,80</td><td class="center mono">1,13</td><td class="center mono" style="color:#ea580c;font-weight:700">4,15</td><td class="center"><span class="pill near">Rendah–Sedang</span></td></tr>
+        <tr><td class="center">5</td><td>November</td><td class="center mono">1,13</td><td class="center mono">2,27</td><td class="center mono">0</td><td class="center mono">1,13</td><td class="center"><span class="pill ok">Sangat Rendah</span></td></tr>
+        <tr><td class="center">6</td><td>Desember</td><td class="center mono">0,07</td><td class="center mono">0,13</td><td class="center mono">0,00</td><td class="center mono">0,07</td><td class="center"><span class="pill ok">Sangat Rendah</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════ K3 ══════════════════ -->
+<div id="k3" class="section">
+  <div class="section-title">Keselamatan & Kesehatan Kerja (K3)</div>
+  <div class="section-sub">Program SMK3 | Zero Accident | Safety Talk | Inspeksi APD | Semester II 2025</div>
+
+  <div class="scorecard-grid">
+    <div class="scorecard green"><div class="icon">🦺</div><div class="label">Kecelakaan Kerja</div><div class="value">ZERO</div><div class="sub">Zero Accident Sem.II 2025</div></div>
+    <div class="scorecard blue"><div class="icon">📢</div><div class="label">Peserta Safety Talk</div><div class="value">841</div><div class="sub">Total Sem.II 2025</div></div>
+    <div class="scorecard teal"><div class="icon">💊</div><div class="label">Obat Keluar (Sem.II)</div><div class="value">348</div><div class="sub">butir/btl (Jul–Nov)</div></div>
+    <div class="scorecard orange"><div class="icon">🩹</div><div class="label">P3K Keluar (Sem.II)</div><div class="value">187</div><div class="sub">item (Jul–Nov)</div></div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">Safety Talk — Peserta per Bulan 2025</div>
+      <div class="chart-sub">Jumlah peserta safety talk per bulan</div>
+      <div class="chart-wrap tall">
+        <canvas id="chartSafetyTalk"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Penggunaan Obat-obatan & P3K Semester II</div>
+      <div class="chart-sub">Jumlah item keluar per bulan (Jul–Nov 2025)</div>
+      <div class="chart-wrap tall">
+        <canvas id="chartObat"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    ✅ <strong>Zero Accident Semester II 2025:</strong> PT. Wana Subur Persada berhasil mempertahankan program <em>zero accident</em> sepanjang Semester II Tahun 2025. Tidak terdapat kejadian kecelakaan kerja yang mengakibatkan hilangnya waktu kerja (Lost Time Injury) maupun cedera fatal. Capaian ini didukung oleh pelaksanaan safety talk rutin dengan total 841 peserta, inspeksi APD periodik, dan penerapan sanksi tegas terhadap pelanggaran prosedur K3.
+  </div>
+
+  <div class="data-table-wrap">
+    <div class="table-header">
+      <div><h3>Rekapitulasi Safety Talk Semester II Tahun 2025</h3></div>
+      <span class="badge green">Total: 841 Peserta</span>
+    </div>
+    <table>
+      <thead><tr>
+        <th class="center">No</th><th>Bulan</th>
+        <th class="center">PT. WSP</th><th class="center">Kontraktor</th>
+        <th class="center">Lain-lain</th><th class="center">Total</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="center">7</td><td>Juli</td><td class="center mono">186</td><td class="center">—</td><td class="center">—</td><td class="center mono" style="font-weight:700">186</td></tr>
+        <tr><td class="center">8</td><td>Agustus</td><td class="center mono">120</td><td class="center">—</td><td class="center">—</td><td class="center mono" style="font-weight:700">120</td></tr>
+        <tr><td class="center">9</td><td>September</td><td class="center mono">176</td><td class="center">—</td><td class="center">—</td><td class="center mono" style="font-weight:700">176</td></tr>
+        <tr><td class="center">10</td><td>Oktober</td><td class="center mono">115</td><td class="center">—</td><td class="center">6</td><td class="center mono" style="font-weight:700">121</td></tr>
+        <tr><td class="center">11</td><td>November</td><td class="center mono">140</td><td class="center">—</td><td class="center">—</td><td class="center mono" style="font-weight:700">140</td></tr>
+        <tr><td class="center">12</td><td>Desember</td><td class="center mono">98</td><td class="center">—</td><td class="center">—</td><td class="center mono" style="font-weight:700">98</td></tr>
+        <tr style="background:#f0fdf4;font-weight:700;color:#15803d">
+          <td colspan="2">TOTAL Sem. II</td>
+          <td class="center">835</td><td class="center">0</td><td class="center">6</td>
+          <td class="center" style="color:#0f3460">841</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════ CSR ══════════════════ -->
+<div id="csr" class="section">
+  <div class="section-title">Program CSR / TJSLP</div>
+  <div class="section-sub">Tanggung Jawab Sosial dan Lingkungan Perusahaan | Semester II 2025 (Juli – Desember)</div>
+
+  <div class="scorecard-grid">
+    <div class="scorecard orange"><div class="icon">🤝</div><div class="label">Total Anggaran Sem.II</div><div class="value" style="font-size:18px">Rp 464,9Jt</div><div class="sub">27 kegiatan terlaksana</div></div>
+    <div class="scorecard blue"><div class="icon">🏗️</div><div class="label">Infrastruktur</div><div class="value">10</div><div class="sub">keg. jalan, jembatan, air bersih</div></div>
+    <div class="scorecard teal"><div class="icon">⛪</div><div class="label">Keagamaan</div><div class="value">9</div><div class="sub">kegiatan keagamaan</div></div>
+    <div class="scorecard green"><div class="icon">🎉</div><div class="label">Sosial/Budaya/Lainnya</div><div class="value">8</div><div class="sub">kegiatan sosial kemasyarakatan</div></div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">Distribusi Kegiatan CSR per Kategori</div>
+      <div class="chart-sub">Semester II 2025 — 27 kegiatan</div>
+      <div class="chart-wrap">
+        <canvas id="chartCsrKat"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Distribusi Anggaran CSR per Kategori</div>
+      <div class="chart-sub">Total Rp 464.858.153,- Semester II 2025</div>
+      <div class="chart-wrap">
+        <canvas id="chartCsrAngg"></canvas>
+      </div>
+    </div>
+    <div class="chart-card full">
+      <div class="chart-title">Progress Bar Anggaran CSR — Top Kegiatan Semester II 2025</div>
+      <div class="chart-sub">Proporsi anggaran per kegiatan terbesar</div>
+      <div style="padding: 10px 0" id="csrProgressBars"></div>
+    </div>
+  </div>
+
+  <div class="data-table-wrap">
+    <div class="table-header">
+      <div><h3>Rekapitulasi Kegiatan CSR/TJSLP Semester II Tahun 2025</h3><p>Sumber: Laporan TJSLP PT WSP Tahun 2025</p></div>
+      <span class="badge green">✓ 27 Kegiatan | Rp 464.858.153,-</span>
+    </div>
+    <table>
+      <thead><tr>
+        <th class="center">No</th><th>Kategori</th><th>Nama Kegiatan</th><th>Lokasi</th>
+        <th class="center">Waktu</th><th class="right">Anggaran (Rp)</th><th class="center">Status</th>
+      </tr></thead>
+      <tbody id="csrTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- end .main -->
+
+<div class="footer">
+  <strong>PT. Wana Subur Persada</strong> | IUPHHK-HTI | Laporan Pelaksanaan RKL-RPL Semester II Tahun 2025 |
+  SK Gubernur Kalbar No.435/BLHD/2012 | Disusun oleh Departemen CHSE
+</div>
+
+<!-- ══════════════════ SCRIPTS ══════════════════ -->
+<script>
+// ── TAB NAVIGATION ──
+function showTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  // Init maps/charts lazily
+  if (id === 'hotspot' && !window.mapInit) initMap();
+}
+
+// ── COLOR PALETTE ──
+const C = {
+  primary: '#0f3460', secondary: '#1e4d8c', accent: '#e94560',
+  green: '#16a34a', red: '#dc2626', yellow: '#ca8a04', teal: '#0f9b8e',
+  orange: '#ea580c', blue: '#3b82f6', purple: '#7c3aed',
+  greenA: 'rgba(22,163,74,0.15)', redA: 'rgba(220,38,38,0.15)',
+};
+Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#64748b';
+
+const LOKASI = ['Kantor WSP','U1 Tapang Tingang','U2 Teluk Kebau','U3 Karang Betung','U4 Kenyabur','U5 Krio Hulu'];
+const SUNGAI = ['A1 Mongko','A2 Knyb.Hulu','A3 Knyb.Tgh','A4 Knyb.Hilir','A5 Kerio','A6 Kerio Hulu','A7 Kerio Hilir'];
+
+// ── OVERVIEW CHARTS ──
+new Chart(document.getElementById('chartKetaatan'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Memenuhi BM','Melampaui BM (Karakateristik alami)'],
+    datasets: [{
+      data: [85, 15],
+      backgroundColor: ['#16a34a','#f97316'],
+      borderWidth: 0, hoverOffset: 8
+    }]
+  },
+  options: {
+    cutout: '70%',
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, padding: 16 } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}%` } }
+    }
+  }
+});
+
+new Chart(document.getElementById('chartHotspotOverview'), {
+  type: 'bar',
+  data: {
+    labels: ['2023 (Jul-Sep)','2024 (Sep)','2025 Sem.II'],
+    datasets: [{
+      label: 'Jumlah Hotspot',
+      data: [318, 139, 168],
+      backgroundColor: ['rgba(234,88,12,0.8)','rgba(202,138,4,0.8)','rgba(220,38,38,0.9)'],
+      borderRadius: 8, borderSkipped: false
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+  }
+});
+
+new Chart(document.getElementById('chartKomponen'), {
+  type: 'bar',
+  data: {
+    labels: ['Udara Ambien\n(48 param)','Kebisingan\n(6 titik)','Emisi Genset\n(2 unit)','Kualitas Air\n(~85%)','K3\n(Zero Acc.)','CSR\n(27 Keg.)'],
+    datasets: [
+      { label: 'Memenuhi / Terlaksana', data: [48,6,2,85,100,100], backgroundColor: 'rgba(22,163,74,0.8)', borderRadius: 6 },
+      { label: 'Perlu Perhatian', data: [0,0,0,15,0,0], backgroundColor: 'rgba(234,88,12,0.7)', borderRadius: 6 }
+    ]
+  },
+  options: {
+    plugins: { legend: { position: 'bottom' } },
+    scales: {
+      x: { stacked: true, grid: { display: false } },
+      y: { stacked: true, grid: { color: '#f1f5f9' }, max: 100 }
+    }
+  }
+});
+
+// ── UDARA CHARTS ──
+new Chart(document.getElementById('chartGas'), {
+  type: 'bar',
+  data: {
+    labels: LOKASI,
+    datasets: [
+      { label: 'SO₂', data: [23.7,22.5,21.2,23.1,22.5,21.8], backgroundColor: 'rgba(59,130,246,0.8)', borderRadius: 4 },
+      { label: 'NO₂', data: [24.9,23.7,23.4,25.5,23.7,24.2], backgroundColor: 'rgba(16,155,142,0.8)', borderRadius: 4 },
+      { label: 'O₃', data: [22.1,21.9,20.6,22.3,21.4,22.5], backgroundColor: 'rgba(124,58,237,0.8)', borderRadius: 4 },
+    ]
+  },
+  options: {
+    plugins: { legend: { position: 'bottom' } },
+    scales: { y: { max: 250, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+  }
+});
+
+new Chart(document.getElementById('chartDebu'), {
+  type: 'bar',
+  data: {
+    labels: LOKASI,
+    datasets: [
+      { label: 'TSP', data: [43.5,45.5,56.4,56.4,51.4,56.4], backgroundColor: 'rgba(234,88,12,0.8)', borderRadius: 4 },
+      { label: 'PM10', data: [17.1,13.5,20.8,28.0,24.7,28.9], backgroundColor: 'rgba(220,38,38,0.7)', borderRadius: 4 },
+      { label: 'PM2.5', data: [10.0,8.64,11.3,15.9,12.6,14.7], backgroundColor: 'rgba(245,166,35,0.8)', borderRadius: 4 },
+    ]
+  },
+  options: {
+    plugins: { legend: { position: 'bottom' } },
+    scales: { y: { max: 250, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+  }
+});
+
+new Chart(document.getElementById('chartKebisingan'), {
+  type: 'bar',
+  data: {
+    labels: LOKASI,
+    datasets: [
+      { label: 'LSM - 24 Jam dB(A)', data: [59.0,49.2,49.8,48.8,50.9,50.3], backgroundColor: 'rgba(15,52,96,0.85)', borderRadius: 6, borderSkipped: false },
+      { label: 'Baku Mutu dB(A)', data: [70,50,55,55,55,55], type: 'line', borderColor: '#dc2626', borderDash: [5,4], borderWidth: 2, pointBackgroundColor: '#dc2626', tension: 0, fill: false }
+    ]
+  },
+  options: {
+    plugins: { legend: { position: 'bottom' } },
+    scales: { y: { min: 40, max: 80, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+  }
+});
+
+// ── EMISI CHARTS ──
+new Chart(document.getElementById('chartNOx'), {
+  type: 'bar',
+  data: {
+    labels: ['Genset 1 (135KVA)','Genset 2 (45KVA)','Baku Mutu'],
+    datasets: [{
+      data: [337, 326, 3400],
+      backgroundColor: ['rgba(15,155,142,0.8)','rgba(59,130,246,0.8)','rgba(220,38,38,0.4)'],
+      borderRadius: 8, borderSkipped: false
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+  }
+});
+
+new Chart(document.getElementById('chartCO'), {
+  type: 'bar',
+  data: {
+    labels: ['Genset 1 (135KVA)','Genset 2 (45KVA)','Baku Mutu'],
+    datasets: [{
+      data: [159, 163, 170],
+      backgroundColor: ['rgba(234,88,12,0.85)','rgba(245,166,35,0.85)','rgba(220,38,38,0.4)'],
+      borderRadius: 8, borderSkipped: false
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: { y: { min: 140, max: 180, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+  }
+});
+
+// ── AIR CHARTS ──
+const airValues = {
+  BOD:  { vals: [3.28,4.30,3.40,3.20,1.94,2.96,3.48], bm: 3 },
+  COD:  { vals: [27.4,36.1,28.5,26.8,16.3,26.4,29.2], bm: 25 },
+  DO:   { vals: [3.70,3.50,3.70,3.80,4.40,3.90,3.70], bm: 4 },
+  pH:   { vals: [7.35,7.45,7.50,7.42,7.30,7.38,7.40], bm: [6,9] },
+};
+
+function makeAirChart(id, key, label, color, unit, bm, bmLabel) {
+  const d = airValues[key];
+  const colors = d.vals.map(v => {
+    if (key === 'DO') return v < bm ? 'rgba(220,38,38,0.85)' : 'rgba(22,163,74,0.85)';
+    if (key === 'pH') return (v >= bm[0] && v <= bm[1]) ? 'rgba(22,163,74,0.85)' : 'rgba(220,38,38,0.85)';
+    return v > bm ? 'rgba(220,38,38,0.85)' : 'rgba(22,163,74,0.85)';
+  });
+  const bmLine = key === 'pH' ? null : Array(7).fill(typeof bm === 'number' ? bm : null);
+  const datasets = [{
+    label, data: d.vals, backgroundColor: colors, borderRadius: 6, borderSkipped: false
+  }];
+  if (bmLine) datasets.push({
+    label: bmLabel || 'Baku Mutu', data: bmLine, type: 'line',
+    borderColor: '#dc2626', borderDash: [4,3], borderWidth: 2,
+    pointBackgroundColor: '#dc2626', tension: 0, fill: false
+  });
+  if (key === 'pH') {
+    datasets.push({ label: 'BM Min (6)', data: Array(7).fill(6), type: 'line', borderColor: '#dc2626', borderDash:[4,3], borderWidth:1.5, pointRadius:0, tension:0, fill: false });
+    datasets.push({ label: 'BM Max (9)', data: Array(7).fill(9), type: 'line', borderColor: '#dc2626', borderDash:[4,3], borderWidth:1.5, pointRadius:0, tension:0, fill: false });
+  }
+  new Chart(document.getElementById(id), {
+    type: 'bar', data: { labels: SUNGAI, datasets },
+    options: {
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10 } } },
+      scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+    }
+  });
+}
+
+makeAirChart('chartBOD','BOD','BOD (mg/L)','green','mg/L',3,'BM: 3 mg/L');
+makeAirChart('chartCOD','COD','COD (mg/L)','red','mg/L',25,'BM: 25 mg/L');
+makeAirChart('chartDO','DO','DO (mg/L)','blue','mg/L',4,'BM Min: 4 mg/L');
+makeAirChart('chartPH','pH','pH','teal','-',[6,9]);
+
+// ── AIR TABLE ──
+const airParams = [
+  { p:'TSS (mg/L)', bm:50, vals:[3.5,36.3,9.83,3.25,3.00,3.12,3.00] },
+  { p:'pH', bm:'6–9', vals:[7.35,7.45,7.50,7.42,7.30,7.38,7.40], neutral:true },
+  { p:'BOD (mg/L)', bm:3, vals:[3.28,4.30,3.40,3.20,1.94,2.96,3.48] },
+  { p:'COD (mg/L)', bm:25, vals:[27.4,36.1,28.5,26.8,16.3,26.4,29.2] },
+  { p:'DO (mg/L)', bm:'Min.4', vals:[3.70,3.50,3.70,3.80,4.40,3.90,3.70], reverse:true },
+  { p:'Total Fosfat (mg/L)', bm:0.2, vals:[0.11,0.69,0.11,0.082,0.41,0.073,0.062] },
+  { p:'Amoniak (mg/L)', bm:0.2, vals:[0.012,0.33,'<0.008','<0.008',0.031,'<0.008','<0.008'] },
+  { p:'Besi/Fe (mg/L)', bm:1, vals:[0.37,1.28,0.29,0.32,0.25,0.39,0.28] },
+  { p:'Seng/Zn (mg/L)', bm:0.05, vals:[0.017,0.060,0.026,0.013,0.031,0.020,'<0.0071'] },
+  { p:'Cr-VI (mg/L)', bm:0.05, vals:[0.0047,0.080,'<0.0015',0.0016,'<0.0015','<0.0015','<0.0015'] },
+  { p:'Fecal Coliform (MPN/100mL)', bm:1000, vals:[330,330,23,49,130,700,22] },
+];
+
+const tbody = document.getElementById('airTableBody');
+airParams.forEach(row => {
+  const tr = document.createElement('tr');
+  let cells = `<td class="param-name">${row.p}</td><td class="center mono" style="font-weight:700;color:#0f3460">${row.bm}</td>`;
+  row.vals.forEach(v => {
+    let isOver = false;
+    if (typeof v === 'number' && typeof row.bm === 'number') {
+      isOver = row.reverse ? v < row.bm : v > row.bm;
+    } else if (typeof v === 'number' && row.p.includes('pH')) {
+      isOver = v < 6 || v > 9;
+    }
+    const style = isOver ? 'color:#dc2626;font-weight:700' : 'color:#15803d';
+    cells += `<td class="center mono" style="${style}">${v}</td>`;
+  });
+  tr.innerHTML = cells;
+  tbody.appendChild(tr);
+});
+
+// ── HOTSPOT CHARTS ──
+new Chart(document.getElementById('chartHotspotBulan'), {
+  type: 'bar',
+  data: {
+    labels: ['Jul','Agt','Sep','Okt'],
+    datasets: [
+      { label: '2023', data: [40,263,15,0], backgroundColor: 'rgba(234,88,12,0.8)', borderRadius: 5 },
+      { label: '2024', data: [0,0,139,0], backgroundColor: 'rgba(59,130,246,0.8)', borderRadius: 5 },
+      { label: '2025', data: [10,30,127,1], backgroundColor: 'rgba(220,38,38,0.9)', borderRadius: 5 },
+    ]
+  },
+  options: {
+    plugins: { legend: { position: 'bottom' } },
+    scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+  }
+});
+
+new Chart(document.getElementById('chartCurahHujan'), {
+  type: 'bar',
+  data: {
+    labels: ['Jul','Agt','Sep','Okt','Nov','Des'],
+    datasets: [
+      { label: 'Curah Hujan (mm)', data: [145,235,295.5,304.5,336,227.5], backgroundColor: 'rgba(59,130,246,0.8)', borderRadius: 5, yAxisID: 'y' },
+      { label: 'Hari Tinggi', data: [0,6,0,0,0,0], backgroundColor: 'rgba(220,38,38,0.9)', borderRadius: 5, yAxisID: 'y1' },
+    ]
+  },
+  options: {
+    plugins: { legend: { position: 'bottom' } },
+    scales: {
+      y: { beginAtZero: true, position: 'left', title: { display: true, text: 'mm' }, grid: { color: '#f1f5f9' } },
+      y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'Hari Tinggi' }, grid: { display: false }, max: 15 },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ── MAP HOTSPOT ──
+window.mapInit = false;
+function initMap() {
+  window.mapInit = true;
+  const map = L.map('mapHotspot').setView([-0.45, 110.77], 10);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    { attribution: '© Esri', maxZoom: 18 }).addTo(map);
+
+  // Batas konsesi WSP
+  const konsesi1 = [[[-0.4672,110.6510],[-0.4673,110.6462],[-0.4712,110.6442],[-0.5095,110.6312],[-0.5197,110.6318],[-0.5301,110.6302],[-0.5356,110.6313],[-0.5490,110.6388],[-0.5633,110.6438],[-0.5789,110.6472],[-0.5864,110.6485],[-0.5952,110.6539],[-0.6015,110.6584],[-0.6075,110.6640],[-0.6143,110.6709],[-0.6173,110.6762],[-0.6203,110.6823],[-0.6225,110.6857],[-0.6253,110.6885],[-0.6345,110.6895],[-0.6353,110.6918],[-0.6353,110.7003],[-0.6355,110.7222],[-0.6356,110.7323],[-0.6357,110.7437],[-0.6357,110.7502],[-0.6304,110.7549],[-0.6259,110.7536],[-0.6174,110.7509],[-0.6135,110.7497],[-0.6112,110.7493],[-0.6057,110.7506],[-0.5981,110.7515],[-0.5957,110.7528],[-0.5923,110.7583],[-0.5869,110.7651],[-0.5838,110.7673],[-0.5806,110.7690],[-0.5757,110.7714],[-0.5713,110.7747],[-0.5683,110.7779],[-0.5651,110.7825],[-0.5635,110.7855],[-0.5619,110.7890],[-0.5617,110.7950],[-0.5619,110.7981],[-0.5615,110.8044],[-0.5620,110.8109],[-0.5640,110.8131],[-0.5655,110.8140],[-0.5682,110.8155],[-0.5694,110.8163],[-0.5749,110.8210],[-0.5766,110.8252],[-0.5765,110.8296],[-0.5781,110.8343],[-0.5825,110.8363],[-0.5880,110.8363],[-0.5937,110.8335],[-0.5975,110.8322],[-0.6000,110.8314],[-0.6043,110.8292],[-0.6072,110.8267],[-0.6098,110.8244],[-0.6128,110.8211],[-0.6139,110.8198],[-0.6148,110.8182],[-0.6175,110.8120],[-0.6364,110.7898],[-0.6366,110.9201],[-0.6273,110.9350],[-0.6163,110.9488],[-0.6123,110.9530],[-0.6109,110.9559],[-0.6088,110.9666],[-0.6066,110.9742],[-0.6064,110.9803],[-0.6156,110.9949],[-0.6150,111.0194],[-0.6147,111.0329],[-0.6150,111.0328],[-0.4672,110.6510]]];
+
+  L.polyline(konsesi1[0], { color: '#f97316', weight: 2, opacity: 0.9, dashArray: '6,4' }).addTo(map);
+
+  // Sample hotspot data 2025
+  const hotspots2025 = [
+    [-0.5280,110.6553],[- 0.5241,110.6548],[-0.2737,110.6090],[-0.5164,110.6551],[-0.5037,110.8334],[-0.5994,110.8451],
+    [-0.4970,110.6395],[-0.4957,110.6389],[-0.2359,110.6440],[-0.5704,110.6484],[-0.5191,110.6487],[-0.5138,110.6360],
+    [-0.5904,110.6701],[-0.5149,110.6362],[-0.5902,110.6528],[-0.5894,110.6539],[-0.5265,110.8875],[-0.2440,110.6479],
+    [-0.5265,110.6486],[-0.5146,110.6410],[-0.5025,110.6351],[-0.5011,110.6440],[-0.5003,110.6493],[-0.4931,110.6534],
+    [-0.5616,110.8384],[-0.5129,110.8315],[-0.3101,110.5903],[-0.2383,110.6273],[-0.6102,110.6737],[-0.6096,110.6777],
+    [-0.6092,110.6752],[-0.6272,110.7174],[-0.6017,110.6755],[-0.5632,110.7793],[-0.5560,110.7909],[-0.5780,110.7177],
+    [-0.5714,110.7261],[-0.5336,110.7973],[-0.2294,110.6110],[-0.6174,110.8916],[-0.6018,110.8813],[-0.5863,110.7532],
+    [-0.5908,110.7230],[-0.5903,110.7268],[-0.5584,110.8234],[-0.6065,110.9701],[-0.6362,110.8930],[-0.6064,110.9009],
+    [-0.5979,110.7504],[-0.5826,110.7605],[-0.6095,110.7101],[-0.5838,110.7383],[-0.5768,110.7179],[-0.5488,110.8322],
+    [-0.5748,110.8690],[-0.5719,110.8680],[-0.5719,110.8821],[-0.5702,110.8804],[-0.5693,110.8602],[-0.5678,110.8587],
+    [-0.5582,110.7782],[-0.6302,110.9194],[-0.5849,110.8756],[-0.6024,110.9004],[-0.6243,110.9175],[-0.5940,110.8897],
+    [-0.5730,110.8852],[-0.5730,110.8845],[-0.5761,110.8814],[-0.5542,110.8506],[-0.5527,110.8501],
+  ];
+
+  const hotspots2023 = [
+    [-0.5201,110.8539],[-0.5845,110.8804],[-0.5874,110.8790],[-0.5892,110.8811],[-0.6194,110.9184],[-0.5778,110.8761],
+    [-0.5818,110.8760],[-0.5378,110.8544],[-0.5425,110.8552],[-0.5442,110.8542],[-0.5221,110.6446],[-0.6342,110.8897],
+    [-0.5636,110.7713],[-0.5631,110.7752],[-0.5509,110.6423],[-0.5210,110.6498],[-0.4910,110.6374],[-0.4883,110.6453],
+    [-0.4951,110.6339],[-0.4945,110.6380],[-0.5352,110.8569],[-0.5283,110.8597],[-0.5280,110.8642],[-0.5592,110.8308],
+    [-0.5926,110.8941],[-0.5352,110.8569],[-0.5714,110.7686],[-0.5799,110.7690],[-0.5807,110.7636],[-0.5936,110.7312],
+  ];
+
+  const hotspots2024 = [
+    [-0.2448,110.6401],[-0.2404,110.6466],[-0.2828,110.5826],[-0.2468,110.6423],[-0.2432,110.6378],[-0.2426,110.6416],
+    [-0.5272,110.8585],[-0.5237,110.8632],[-0.6291,110.8910],[-0.6281,110.8979],[-0.5846,110.8633],[-0.5834,110.8642],
+    [-0.6135,110.8850],[-0.6071,110.8840],[-0.6062,110.8894],[-0.5941,110.8823],[-0.6326,110.8855],[-0.6320,110.9181],
+    [-0.6277,110.8889],[-0.5856,110.7518],[-0.5827,110.7529],[-0.5586,110.7735],[-0.5485,110.7777],[-0.5484,110.7793],
+    [-0.5757,110.6952],[-0.6095,110.7054],[-0.5716,110.7159],[-0.5793,110.7171],[-0.6062,110.7335],[-0.6031,110.7257],
+  ];
+
+  function addMarkers(data, color, year) {
+    data.forEach(([lat, lng]) => {
+      L.circleMarker([lat, lng], {
+        radius: 5, fillColor: color, color: 'white', weight: 0.8, fillOpacity: 0.85
+      }).bindPopup(`<b style="color:${color}">🔥 Hotspot ${year}</b><br>Lat: ${lat.toFixed(5)}<br>Lng: ${lng.toFixed(5)}<br><i>Ladang berpindah masyarakat</i>`).addTo(map);
+    });
+  }
+
+  addMarkers(hotspots2023, '#22c55e', '2023');
+  addMarkers(hotspots2024, '#3b82f6', '2024');
+  addMarkers(hotspots2025, '#ef4444', '2025');
+
+  // Legend
+  const legend = L.control({position: 'bottomleft'});
+  legend.onAdd = () => {
+    const div = document.createElement('div');
+    div.className = 'map-legend';
+    div.innerHTML = `
+      <div style="font-weight:700;margin-bottom:8px;color:#7dd3fc">🔥 Hotspot dalam Konsesi WSP</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> 2023 (318 titik)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> 2024 (139 titik)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> 2025 Sem.II (168 titik)</div>
+      <hr style="border-color:rgba(255,255,255,0.2);margin:8px 0">
+      <div class="legend-item"><div style="width:20px;height:2px;background:#f97316;border-top:2px dashed #f97316"></div> Batas Konsesi</div>
+    `;
+    return div;
+  };
+  legend.addTo(map);
+}
+
+// ── EROSI CHARTS ──
+const bulanSem2 = ['Juli','Agustus','September','Oktober','November','Desember'];
+new Chart(document.getElementById('chartErosi'), {
+  type: 'line',
+  data: {
+    labels: bulanSem2,
+    datasets: [
+      { label: 'T1', data: [0,1.13,1.13,4.53,1.13,0.07], borderColor: '#0f3460', backgroundColor: 'rgba(15,52,96,0.1)', tension: 0.4, fill: true, pointRadius: 5 },
+      { label: 'T2', data: [1.13,1.13,2.27,6.80,2.27,0.13], borderColor: '#dc2626', backgroundColor: 'rgba(220,38,38,0.08)', tension: 0.4, fill: true, pointRadius: 5 },
+      { label: 'T3', data: [0,0,0,1.13,0,0.00], borderColor: '#16a34a', backgroundColor: 'rgba(22,163,74,0.08)', tension: 0.4, fill: true, pointRadius: 5 },
+    ]
+  },
+  options: {
+    plugins: { legend: { position: 'bottom' } },
+    scales: { y: { beginAtZero: true, title: { display: true, text: 'mm' }, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+  }
+});
+
+new Chart(document.getElementById('chartDebit'), {
+  type: 'line',
+  data: {
+    labels: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov'],
+    datasets: [
+      { label: 'A2 Kenyabur Hulu', data: [12.95,18.26,16.39,13.07,12.36,null,11.85,9.45,12.62,9.59,12.74], borderColor: '#3b82f6', tension: 0.4, pointRadius: 4 },
+      { label: 'A3 Kenyabur Tengah', data: [21.01,32.03,12.32,8.04,8.18,null,9.07,5.78,12.70,7.32,12.71], borderColor: '#0f9b8e', tension: 0.4, pointRadius: 4 },
+      { label: 'A4 Kenyabur Hilir', data: [21.34,30.78,16.77,10.32,13.12,null,14.92,14.19,18.48,16.92,17.21], borderColor: '#0f3460', tension: 0.4, pointRadius: 4 },
+      { label: 'A5 Kerio', data: [9.08,12.42,10.13,8.75,8.24,null,8.57,9.92,9.55,10.22,8.76], borderColor: '#ea580c', tension: 0.4, pointRadius: 4 },
+    ]
+  },
+  options: {
+    plugins: { legend: { position: 'bottom' } },
+    scales: { y: { title: { display: true, text: 'm³/detik' }, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+  }
+});
+
+// ── K3 CHARTS ──
+new Chart(document.getElementById('chartSafetyTalk'), {
+  type: 'bar',
+  data: {
+    labels: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'],
+    datasets: [{
+      label: 'Peserta Safety Talk',
+      data: [103,153,140,152,127,81,186,120,176,121,140,98],
+      backgroundColor: (ctx) => {
+        const i = ctx.dataIndex;
+        return i >= 6 ? 'rgba(15,52,96,0.85)' : 'rgba(148,163,184,0.5)';
+      },
+      borderRadius: 6, borderSkipped: false
+    }]
+  },
+  options: {
+    plugins: {
+      legend: { display: false },
+      annotation: {}
+    },
+    scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+  }
+});
+
+new Chart(document.getElementById('chartObat'), {
+  type: 'bar',
+  data: {
+    labels: ['Jul','Agt','Sep','Okt','Nov'],
+    datasets: [
+      { label: 'Obat-obatan', data: [54,59,163,25,47], backgroundColor: 'rgba(124,58,237,0.8)', borderRadius: 5 },
+      { label: 'P3K', data: [2,9,60,29,87], backgroundColor: 'rgba(15,155,142,0.8)', borderRadius: 5 },
+    ]
+  },
+  options: {
+    plugins: { legend: { position: 'bottom' } },
+    scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+  }
+});
+
+// ── CSR DATA ──
+const csrData = [
+  { kat:'Infrastruktur', nama:'Maintenance Jalan (1.385m) Kemurang-Meragun', lokasi:'Kemurang-Meragun', waktu:'Jul 2025', angg:31087710 },
+  { kat:'Infrastruktur', nama:'Maintenance Jalan (607m) Sungai Pandak', lokasi:'Sungai Pandak', waktu:'Jul 2025', angg:13624722 },
+  { kat:'Infrastruktur', nama:'Maintenance Jalan (4.375m) Sungai Pandak-Belanger', lokasi:'Sungai Pandak-Belanger', waktu:'Jul 2025', angg:98201250 },
+  { kat:'Infrastruktur', nama:'Maintenance Jalan (2.743m) Belanger-Suakmansi', lokasi:'Belanger-Suakmansi', waktu:'Jul 2025', angg:61569378 },
+  { kat:'Keagamaan', nama:'Pembuatan Tapak Gereja Nanga Mahap', lokasi:'Nanga Mahap', waktu:'Jul 2025', angg:169568000 },
+  { kat:'Lainnya', nama:'Bantuan HUT Ulang Tahun Panglima Jilah', lokasi:'Ng Mahap', waktu:'Agt 2025', angg:1500000 },
+  { kat:'Keagamaan', nama:'Ulang Tahun Gereja & WK Stasi Santa Maria', lokasi:'Dsn Mulai', waktu:'Agt 2025', angg:500000 },
+  { kat:'Keagamaan', nama:'Peresmian Gereja Katolik Stasi Nanga Suri', lokasi:'Nanga Suri', waktu:'Agt 2025', angg:500000 },
+  { kat:'Keagamaan', nama:'Bantuan Dana BKMT Tembesuk', lokasi:'Tembesuk', waktu:'Agt 2025', angg:500000 },
+  { kat:'Infrastruktur', nama:'Maintenance Jalan (64,9m) Karang Betung-Ensayang', lokasi:'Karang Betung-Ensayang', waktu:'Agt 2025', angg:36344000 },
+  { kat:'Lainnya', nama:'HUT RI Ke-80 Kec. Nanga Mahap', lokasi:'Kec Ng Mahap', waktu:'Agt 2025', angg:2000000 },
+  { kat:'Lainnya', nama:'HUT RI Ke-80 Kec. Nanga Taman', lokasi:'Kec Ng Taman', waktu:'Sep 2025', angg:2000000 },
+  { kat:'Lainnya', nama:'HUT RI Ke-80 Dsn Biang Poring', lokasi:'Dsn Biang Poring', waktu:'Sep 2025', angg:500000 },
+  { kat:'Infrastruktur', nama:'Maintenance Jalan (68,04m) Nanga Kojang', lokasi:'Nanga Kojang', waktu:'Sep 2025', angg:38103093 },
+  { kat:'Olahraga', nama:'Open Turnamen Beringin Cup 2025', lokasi:'Lembah Beringin', waktu:'Sep 2025', angg:500000 },
+  { kat:'Infrastruktur', nama:'Dukungan Perbaikan Jembatan Pekawai', lokasi:'Nanga Mahap', waktu:'Okt 2025', angg:1000000 },
+  { kat:'Air Bersih', nama:'Pipanisasi Air Bersih RT.05 Sawan', lokasi:'RT.05 Sawan', waktu:'Okt 2025', angg:1220000 },
+  { kat:'Olahraga', nama:'Open Turnamen Glora Karya Muda', lokasi:'Kec Ng Mahap', waktu:'Okt 2025', angg:500000 },
+  { kat:'Pendidikan', nama:'Perlombaan PAUD Se-Kec. Nanga Mahap', lokasi:'Kec Ng Mahap', waktu:'Okt 2025', angg:500000 },
+  { kat:'Lainnya', nama:'Sosialisasi Sabang Merah', lokasi:'Ng Mahap', waktu:'Okt 2025', angg:500000 },
+  { kat:'Keagamaan', nama:'Maulid Nabi Muhammad SAW', lokasi:'Dsn Tembesuk', waktu:'Okt 2025', angg:500000 },
+  { kat:'Keagamaan', nama:'Pelantikan WKRI Stasi Pait', lokasi:'Dsn Pait', waktu:'Nov 2025', angg:500000 },
+  { kat:'Keagamaan', nama:'Bantuan Solar Masjid Al-Ikhlas', lokasi:'Dsn Ng Kenak', waktu:'Nov 2025', angg:140000 },
+  { kat:'Olahraga', nama:'Open Turnamen Bola Volly Dsn Sarik', lokasi:'Dsn Sarik', waktu:'Des 2025', angg:500000 },
+  { kat:'Keagamaan', nama:'Material Pembangunan Gereja Stasi Suakmansi', lokasi:'Dsn Suakmansi', waktu:'Des 2025', angg:1000000 },
+  { kat:'Ekonomi', nama:'Pengusuran Lahan Ketahanan Pangan Jagung', lokasi:'Karang Betung', waktu:'Des 2025', angg:1000000 },
+  { kat:'Sosial Budaya', nama:'Ulang Tahun Keramat Pulo Kebayan', lokasi:'Dsn Sekadau Hulu', waktu:'Des 2025', angg:500000 },
+];
+
+const catClass = {
+  'Infrastruktur':'cat-infra','Keagamaan':'cat-agama','Lainnya':'cat-lain',
+  'Olahraga':'cat-olah','Pendidikan':'cat-pend','Air Bersih':'cat-air',
+  'Ekonomi':'cat-eko','Sosial Budaya':'cat-sosial'
+};
+
+const csrTbody = document.getElementById('csrTableBody');
+csrData.forEach((d,i) => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td class="center mono">${i+1}</td>
+    <td><span class="csr-cat ${catClass[d.kat]||'cat-lain'}">${d.kat}</span></td>
+    <td class="param-name">${d.nama}</td>
+    <td style="color:#64748b;font-size:11px">${d.lokasi}</td>
+    <td class="center" style="font-size:11px">${d.waktu}</td>
+    <td class="right mono">${d.angg.toLocaleString('id-ID')}</td>
+    <td class="center"><span class="pill ok">✓ Selesai</span></td>
+  `;
+  csrTbody.appendChild(tr);
+});
+
+// CSR Summary Row
+const sumTr = document.createElement('tr');
+sumTr.style.cssText = 'background:#f0fdf4;font-weight:700;color:#15803d';
+sumTr.innerHTML = `<td colspan="5" style="text-align:right;padding:10px 14px;color:#0f3460">TOTAL ANGGARAN CSR SEMESTER II 2025</td><td class="right mono" style="color:#0f3460">464.858.153</td><td class="center">27 Keg.</td>`;
+csrTbody.appendChild(sumTr);
+
+// CSR Charts
+const csrByKat = {};
+csrData.forEach(d => {
+  csrByKat[d.kat] = (csrByKat[d.kat] || { count:0, total:0 });
+  csrByKat[d.kat].count++;
+  csrByKat[d.kat].total += d.angg;
+});
+const csrLabels = Object.keys(csrByKat);
+const csrCounts = csrLabels.map(k => csrByKat[k].count);
+const csrAnggs = csrLabels.map(k => csrByKat[k].total);
+const csrColors = ['#3b82f6','#7c3aed','#ea580c','#16a34a','#ca8a04','#64748b','#0f9b8e','#f43f5e'];
+
+new Chart(document.getElementById('chartCsrKat'), {
+  type: 'doughnut',
+  data: { labels: csrLabels, datasets: [{ data: csrCounts, backgroundColor: csrColors, borderWidth: 2, borderColor: 'white', hoverOffset: 8 }] },
+  options: { cutout: '60%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 11, padding: 10, font: { size: 10 } } } } }
+});
+
+new Chart(document.getElementById('chartCsrAngg'), {
+  type: 'doughnut',
+  data: { labels: csrLabels, datasets: [{ data: csrAnggs, backgroundColor: csrColors, borderWidth: 2, borderColor: 'white', hoverOffset: 8 }] },
+  options: {
+    cutout: '60%',
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 11, padding: 10, font: { size: 10 } } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.label}: Rp ${ctx.raw.toLocaleString('id-ID')}` } }
+    }
+  }
+});
+
+// Progress bars CSR
+const topCsr = [...csrData].sort((a,b) => b.angg-a.angg).slice(0,8);
+const maxAngg = topCsr[0].angg;
+const pbWrap = document.getElementById('csrProgressBars');
+topCsr.forEach((d,i) => {
+  const pct = (d.angg/maxAngg*100).toFixed(0);
+  const colors = ['#0f3460','#1e4d8c','#3b82f6','#0f9b8e','#16a34a','#ca8a04','#ea580c','#dc2626'];
+  pbWrap.innerHTML += `
+    <div class="prog-item" style="padding:0 10px;margin-bottom:10px">
+      <div class="prog-label"><span>${d.nama.substring(0,55)}${d.nama.length>55?'…':''}</span><span>Rp ${(d.angg/1000000).toFixed(1)}Jt</span></div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${colors[i]}"></div></div>
+    </div>
+  `;
+});
+
+</script>
+</body>
+</html>
